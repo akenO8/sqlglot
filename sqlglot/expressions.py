@@ -3255,6 +3255,9 @@ class WindowSpec(Expression):
 class Where(Expression):
     pass
 
+class Stime(Expression):
+    pass
+
 
 class Star(Expression):
     arg_types = {"except": False, "replace": False}
@@ -4164,6 +4167,10 @@ class Day(Func):
     pass
 
 
+class Minute(Func):
+    pass
+
+
 class Decode(Func):
     arg_types = {"this": True, "charset": True, "replace": False}
 
@@ -4428,17 +4435,6 @@ class RegexpExtract(Func):
         "occurrence": False,
         "parameters": False,
         "group": False,
-    }
-
-
-class RegexpReplace(Func):
-    arg_types = {
-        "this": True,
-        "expression": True,
-        "replacement": True,
-        "position": False,
-        "occurrence": False,
-        "parameters": False,
     }
 
 

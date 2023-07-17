@@ -112,7 +112,7 @@ def _ts_or_ds_add_sql(self: generator.Generator, expression: exp.TsOrDsAdd) -> s
     this = expression.this
 
     if not isinstance(this, exp.CurrentDate):
-        this = exp.cast(exp.cast(expression.this, "TIMESTAMP"), "DATE")
+        this = exp.cast(expression.this, "TIMESTAMP")
 
     return self.func(
         "DATE_ADD",
@@ -281,6 +281,9 @@ class Presto(Dialect):
             ),
             exp.DateStrToDate: lambda self, e: f"CAST(DATE_PARSE({self.sql(e, 'this')}, {Presto.DATE_FORMAT}) AS DATE)",
             exp.DateToDi: lambda self, e: f"CAST(DATE_FORMAT({self.sql(e, 'this')}, {Presto.DATEINT_FORMAT}) AS INT)",
+            exp.DateTrunc: lambda self, e: self.func(
+                "DATE_TRUNC", exp.Literal.string('MINUTE' if e.text("unit") == 'MI' or e.text("unit") == 'mi' else e.text("unit") or "minute"), e.expression, e.this
+            ),
             exp.Decode: _decode_sql,
             exp.DiToDate: lambda self, e: f"CAST(DATE_PARSE(CAST({self.sql(e, 'this')} AS VARCHAR), {Presto.DATEINT_FORMAT}) AS DATE)",
             exp.Encode: _encode_sql,
@@ -295,6 +298,7 @@ class Presto(Dialect):
             exp.Levenshtein: rename_func("LEVENSHTEIN_DISTANCE"),
             exp.LogicalAnd: rename_func("BOOL_AND"),
             exp.LogicalOr: rename_func("BOOL_OR"),
+            exp.Minute: lambda self, e: f"MINUTE(CAST({str(e.this).split('TS_OR_DS_TO_DATE(')[1][:-1]} AS TIMESTAMP))",
             exp.Pivot: no_pivot_sql,
             exp.Quantile: _quantile_sql,
             exp.RegexpExtract: regexp_extract_sql,
@@ -375,6 +379,7 @@ class Presto(Dialect):
         def offset_limit_modifiers(
             self, expression: exp.Expression, fetch: bool, limit: t.Optional[exp.Fetch | exp.Limit]
         ) -> t.List[str]:
+            # print(self.extract_sql())
             return [
                 self.sql(expression, "offset"),
                 self.sql(limit),

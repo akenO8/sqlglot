@@ -22,6 +22,7 @@ class Dialects(str, Enum):
     DRILL = "drill"
     DUCKDB = "duckdb"
     HIVE = "hive"
+    IMPALA = "impala"
     MYSQL = "mysql"
     ORACLE = "oracle"
     POSTGRES = "postgres"
@@ -627,16 +628,6 @@ def regexp_extract_sql(self: Generator, expression: exp.RegexpExtract) -> str:
 
     return self.func(
         "REGEXP_EXTRACT", expression.this, expression.expression, expression.args.get("group")
-    )
-
-
-def regexp_replace_sql(self: Generator, expression: exp.RegexpReplace) -> str:
-    bad_args = list(filter(expression.args.get, ("position", "occurrence", "parameters")))
-    if bad_args:
-        self.unsupported(f"REGEXP_REPLACE does not support the following arg(s): {bad_args}")
-
-    return self.func(
-        "REGEXP_REPLACE", expression.this, expression.expression, expression.args["replacement"]
     )
 
 
